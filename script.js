@@ -310,7 +310,7 @@ handleResponsiveImages();
 // CONSOLE MESSAGE
 // ================================
 
-console.log('%c🏠 De Nys Franck - Couvreur Professionnel', 
+console.log('%c🏠 De Nys Clément - Couvreur Professionnel', 
     'font-size: 20px; font-weight: bold; color: #b87333;');
 console.log('%cSite web développé avec soin et professionnalisme', 
     'font-size: 12px; color: #2c3e50;');

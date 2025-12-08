@@ -657,6 +657,41 @@ section {
    TESTIMONIALS SECTION
    ================================ */
 
+.instagram-feed {
+    background: var(--color-white);
+    padding: 80px 0;
+}
+
+.instagram-embed {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.instagram-cta {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.instagram-cta .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    font-size: 1.1rem;
+}
+
+.instagram-cta .btn svg {
+    transition: var(--transition);
+}
+
+.instagram-cta .btn:hover svg {
+    transform: scale(1.2) rotate(5deg);
+}
+
+/* ================================
+   TESTIMONIALS SECTION
+   ================================ */
+
 .testimonials {
     background: linear-gradient(180deg, var(--color-light-grey) 0%, var(--color-white) 100%);
 }

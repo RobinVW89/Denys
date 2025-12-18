@@ -69,7 +69,7 @@ function init3D() {
     camera.lookAt(0, 0, 0);
 
     // Renderer
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
@@ -1075,87 +1075,167 @@ function saveConfiguration() {
         }
     };
     
-    // 1. Sauvegarder l'image 3D
+    // Créer le PDF avec jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // En-tête avec fond sombre
+    doc.setFillColor(44, 62, 80);
+    doc.rect(0, 0, 210, 45, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(26);
+    doc.setFont(undefined, 'bold');
+    doc.text('DE NYS CLÉMENT', 105, 18, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'normal');
+    doc.text('Toiture & Couverture', 105, 28, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.text(`Configuration du ${configuration.date}`, 105, 38, { align: 'center' });
+    
+    // Récupérer l'image du canvas 3D
     const canvas = document.getElementById('canvas3d');
     canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `toiture-3d-${Date.now()}.png`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function() {
+            const imgData = reader.result;
+            
+            // Ajouter l'image du rendu 3D
+            doc.addImage(imgData, 'PNG', 15, 52, 180, 100);
+            
+            // Section Spécifications
+            let y = 160;
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('SPÉCIFICATIONS DE LA TOITURE', 15, y);
+            
+            doc.setDrawColor(52, 152, 219);
+            doc.setLineWidth(0.5);
+            doc.line(15, y + 2, 195, y + 2);
+            
+            y += 10;
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Type de toiture :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.toiture.type, 70, y);
+            
+            y += 7;
+            doc.setFont(undefined, 'bold');
+            doc.text('Matériau :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.toiture.materiau, 70, y);
+            
+            y += 7;
+            doc.setFont(undefined, 'bold');
+            doc.text('Couleur :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.toiture.couleur, 70, y);
+            
+            y += 7;
+            doc.setFont(undefined, 'bold');
+            doc.text('Pente :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.toiture.pente, 70, y);
+            
+            // Section Éléments additionnels
+            y += 15;
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(44, 62, 80);
+            doc.text('ÉLÉMENTS SUPPLÉMENTAIRES', 15, y);
+            doc.line(15, y + 2, 195, y + 2);
+            
+            y += 10;
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            const checkmark = configuration.elements.cheminee === 'Oui' ? '✓' : '✗';
+            doc.setFont(undefined, 'bold');
+            doc.text('Cheminée :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${checkmark} ${configuration.elements.cheminee}`, 70, y);
+            
+            y += 7;
+            const checkmark2 = configuration.elements.fenetreToit === 'Oui' ? '✓' : '✗';
+            doc.setFont(undefined, 'bold');
+            doc.text('Fenêtre de toit (Velux) :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${checkmark2} ${configuration.elements.fenetreToit}`, 70, y);
+            
+            y += 7;
+            const checkmark3 = configuration.elements.gouttieres === 'Oui' ? '✓' : '✗';
+            doc.setFont(undefined, 'bold');
+            doc.text('Gouttières cuivre :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${checkmark3} ${configuration.elements.gouttieres}`, 70, y);
+            
+            y += 7;
+            const checkmark4 = configuration.elements.panneauxSolaires === 'Oui' ? '✓' : '✗';
+            doc.setFont(undefined, 'bold');
+            doc.text('Panneaux solaires :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${checkmark4} ${configuration.elements.panneauxSolaires}`, 70, y);
+            
+            // Section Options qualité
+            y += 15;
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(44, 62, 80);
+            doc.text('PERFORMANCE & QUALITÉ', 15, y);
+            doc.line(15, y + 2, 195, y + 2);
+            
+            y += 10;
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Isolation :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.qualite.isolation, 70, y);
+            
+            y += 7;
+            doc.setFont(undefined, 'bold');
+            doc.text('Garantie :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.qualite.garantie, 70, y);
+            
+            y += 7;
+            doc.setFont(undefined, 'bold');
+            doc.text('Finition :', 20, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(configuration.qualite.finition, 70, y);
+            
+            // Pied de page avec informations de contact
+            doc.setFillColor(44, 62, 80);
+            doc.rect(0, 270, 210, 27, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('CONTACT', 105, 279, { align: 'center' });
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            doc.text('Email: robinvw89@gmail.com  |  Téléphone: 0032498761968', 105, 286, { align: 'center' });
+            doc.setFontSize(9);
+            doc.text('Pour un devis personnalisé gratuit, contactez-nous !', 105, 292, { align: 'center' });
+            
+            // Sauvegarder le PDF
+            doc.save(`configuration-toiture-${Date.now()}.pdf`);
+            
+            // Message de confirmation
+            alert('✅ Configuration sauvegardée en PDF !\n\n' +
+                  'Votre configuration a été exportée avec succès.\n' +
+                  'Conservez ce fichier pour votre devis personnalisé !');
+        };
     });
-    
-    // 2. Sauvegarder le fichier de configuration JSON
-    const configJSON = JSON.stringify(configuration, null, 2);
-    const blob = new Blob([configJSON], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = `configuration-toiture-${Date.now()}.json`;
-    link.href = url;
-    link.click();
-    URL.revokeObjectURL(url);
-    
-    // 3. Créer un document texte lisible
-    const configText = `
-═══════════════════════════════════════════════════
-    CONFIGURATION DE VOTRE TOITURE
-    De Nys Clément - Couvreur Professionnel
-═══════════════════════════════════════════════════
-
-Date de création: ${configuration.date}
-
-─────────────────────────────────────────────────
-CARACTÉRISTIQUES DE LA TOITURE
-─────────────────────────────────────────────────
-Type de toiture    : ${configuration.toiture.type}
-Matériau           : ${configuration.toiture.materiau}
-Couleur            : ${configuration.toiture.couleur}
-Pente              : ${configuration.toiture.pente}
-
-─────────────────────────────────────────────────
-ÉLÉMENTS SUPPLÉMENTAIRES
-─────────────────────────────────────────────────
-Cheminée           : ${configuration.elements.cheminee}
-Fenêtre de toit    : ${configuration.elements.fenetreToit}
-Gouttières cuivre  : ${configuration.elements.gouttieres}
-Panneaux solaires  : ${configuration.elements.panneauxSolaires}
-
-─────────────────────────────────────────────────
-PERFORMANCE & QUALITÉ
-─────────────────────────────────────────────────
-Isolation          : ${configuration.qualite.isolation}
-Garantie           : ${configuration.qualite.garantie}
-Finition           : ${configuration.qualite.finition}
-
-═══════════════════════════════════════════════════
-
-Cette configuration a été générée par le configurateur
-3D de De Nys Clément.
-
-Pour obtenir un devis personnalisé gratuit, 
-contactez-nous :
-📞 +32 4XX XX XX XX
-✉️ contact@denysclement.be
-
-═══════════════════════════════════════════════════
-    `;
-    
-    const textBlob = new Blob([configText], { type: 'text/plain' });
-    const textUrl = URL.createObjectURL(textBlob);
-    const textLink = document.createElement('a');
-    textLink.download = `ma-toiture-${Date.now()}.txt`;
-    textLink.href = textUrl;
-    textLink.click();
-    URL.revokeObjectURL(textUrl);
-    
-    // Message de confirmation
-    alert('✅ Configuration sauvegardée !\n\n' +
-          '📥 Vous avez téléchargé :\n' +
-          '• Image 3D de votre toiture\n' +
-          '• Fichier de configuration (JSON)\n' +
-          '• Résumé détaillé (TXT)\n\n' +
-          'Conservez ces fichiers pour votre devis personnalisé !');
 }
 
 // ================================

@@ -979,6 +979,11 @@ function setupEventListeners() {
         updateOptions();
     });
 
+    // Bouton Sauvegarder
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        saveConfiguration();
+    });
+
     // Boutons
     document.getElementById('resetBtn').addEventListener('click', () => {
         currentRoofType = 'gable';
@@ -1013,6 +1018,144 @@ function setupEventListeners() {
     document.getElementById('viewTop').addEventListener('click', () => setView('viewTop'));
     document.getElementById('viewSide').addEventListener('click', () => setView('viewSide'));
     document.getElementById('viewReset').addEventListener('click', () => setView('viewReset'));
+}
+
+// ================================
+// SAUVEGARDE DE LA CONFIGURATION
+// ================================
+
+function saveConfiguration() {
+    // Obtenir les noms des matériaux
+    const materialNames = {
+        tuiles: 'Tuiles en terre cuite',
+        ardoises: 'Ardoises naturelles',
+        zinc: 'Zinc',
+        'bac-acier': 'Bac acier'
+    };
+    
+    const roofTypes = {
+        gable: 'Toiture à deux pentes',
+        hip: 'Toiture à quatre pentes',
+        flat: 'Toiture plate'
+    };
+    
+    // Obtenir la couleur sélectionnée
+    const colorName = document.querySelector('.color-btn.active')?.title || 'Non définie';
+    
+    // Obtenir les options de qualité
+    const isolation = document.getElementById('insulation').options[document.getElementById('insulation').selectedIndex].text;
+    const warranty = document.getElementById('warranty').options[document.getElementById('warranty').selectedIndex].text;
+    const finish = document.getElementById('finish').options[document.getElementById('finish').selectedIndex].text;
+    
+    // Créer l'objet de configuration
+    const configuration = {
+        date: new Date().toLocaleDateString('fr-FR', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }),
+        toiture: {
+            type: roofTypes[currentRoofType],
+            materiau: materialNames[currentMaterial],
+            couleur: colorName,
+            pente: currentRoofType !== 'flat' ? `${currentPitch}°` : 'N/A'
+        },
+        elements: {
+            cheminee: config.showChimney ? 'Oui' : 'Non',
+            fenetreToit: config.showSkylight ? 'Oui' : 'Non',
+            gouttieres: config.showGutter ? 'Oui' : 'Non',
+            panneauxSolaires: config.showSolarPanels ? 'Oui' : 'Non'
+        },
+        qualite: {
+            isolation: isolation,
+            garantie: warranty,
+            finition: finish
+        }
+    };
+    
+    // 1. Sauvegarder l'image 3D
+    const canvas = document.getElementById('canvas3d');
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `toiture-3d-${Date.now()}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+    
+    // 2. Sauvegarder le fichier de configuration JSON
+    const configJSON = JSON.stringify(configuration, null, 2);
+    const blob = new Blob([configJSON], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `configuration-toiture-${Date.now()}.json`;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    // 3. Créer un document texte lisible
+    const configText = `
+═══════════════════════════════════════════════════
+    CONFIGURATION DE VOTRE TOITURE
+    De Nys Clément - Couvreur Professionnel
+═══════════════════════════════════════════════════
+
+Date de création: ${configuration.date}
+
+─────────────────────────────────────────────────
+CARACTÉRISTIQUES DE LA TOITURE
+─────────────────────────────────────────────────
+Type de toiture    : ${configuration.toiture.type}
+Matériau           : ${configuration.toiture.materiau}
+Couleur            : ${configuration.toiture.couleur}
+Pente              : ${configuration.toiture.pente}
+
+─────────────────────────────────────────────────
+ÉLÉMENTS SUPPLÉMENTAIRES
+─────────────────────────────────────────────────
+Cheminée           : ${configuration.elements.cheminee}
+Fenêtre de toit    : ${configuration.elements.fenetreToit}
+Gouttières cuivre  : ${configuration.elements.gouttieres}
+Panneaux solaires  : ${configuration.elements.panneauxSolaires}
+
+─────────────────────────────────────────────────
+PERFORMANCE & QUALITÉ
+─────────────────────────────────────────────────
+Isolation          : ${configuration.qualite.isolation}
+Garantie           : ${configuration.qualite.garantie}
+Finition           : ${configuration.qualite.finition}
+
+═══════════════════════════════════════════════════
+
+Cette configuration a été générée par le configurateur
+3D de De Nys Clément.
+
+Pour obtenir un devis personnalisé gratuit, 
+contactez-nous :
+📞 +32 4XX XX XX XX
+✉️ contact@denysclement.be
+
+═══════════════════════════════════════════════════
+    `;
+    
+    const textBlob = new Blob([configText], { type: 'text/plain' });
+    const textUrl = URL.createObjectURL(textBlob);
+    const textLink = document.createElement('a');
+    textLink.download = `ma-toiture-${Date.now()}.txt`;
+    textLink.href = textUrl;
+    textLink.click();
+    URL.revokeObjectURL(textUrl);
+    
+    // Message de confirmation
+    alert('✅ Configuration sauvegardée !\n\n' +
+          '📥 Vous avez téléchargé :\n' +
+          '• Image 3D de votre toiture\n' +
+          '• Fichier de configuration (JSON)\n' +
+          '• Résumé détaillé (TXT)\n\n' +
+          'Conservez ces fichiers pour votre devis personnalisé !');
 }
 
 // ================================

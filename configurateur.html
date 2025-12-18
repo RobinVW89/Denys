@@ -112,15 +112,8 @@
                         </svg>
                         Couleur
                     </h3>
-                    <div class="color-selector">
-                        <button class="color-btn active" data-color="#8B4513" style="background-color: #8B4513;" title="Rouge terre cuite"></button>
-                        <button class="color-btn" data-color="#2F4F4F" style="background-color: #2F4F4F;" title="Ardoise gris foncé"></button>
-                        <button class="color-btn" data-color="#696969" style="background-color: #696969;" title="Gris anthracite"></button>
-                        <button class="color-btn" data-color="#8B7355" style="background-color: #8B7355;" title="Brun"></button>
-                        <button class="color-btn" data-color="#708090" style="background-color: #708090;" title="Gris ardoise"></button>
-                        <button class="color-btn" data-color="#CD5C5C" style="background-color: #CD5C5C;" title="Rouge"></button>
-                        <button class="color-btn" data-color="#1C1C1C" style="background-color: #1C1C1C;" title="Noir"></button>
-                        <button class="color-btn" data-color="#C0C0C0" style="background-color: #C0C0C0;" title="Zinc naturel"></button>
+                    <div class="color-selector" id="colorSelector">
+                        <!-- Les couleurs seront ajoutées dynamiquement selon le matériau -->
                     </div>
                 </div>
 
@@ -144,7 +137,7 @@
                         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
-                        Options supplémentaires
+                        Éléments de toiture
                     </h3>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
@@ -153,13 +146,61 @@
                         </label>
                         <label class="checkbox-label">
                             <input type="checkbox" id="skylight">
-                            <span>Fenêtre de toit</span>
+                            <span>Fenêtre de toit (Velux)</span>
                         </label>
                         <label class="checkbox-label">
                             <input type="checkbox" id="gutter">
-                            <span>Gouttières</span>
+                            <span>Gouttières en cuivre</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="solarPanels">
+                            <span>Panneaux solaires</span>
                         </label>
                     </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        Performance & Qualité
+                    </h3>
+                    <div class="quality-options">
+                        <div class="quality-item">
+                            <label>Isolation</label>
+                            <select id="insulation" class="premium-select">
+                                <option value="standard">Standard (R=4)</option>
+                                <option value="premium" selected>Premium (R=6)</option>
+                                <option value="passive">Passif (R=8)</option>
+                            </select>
+                        </div>
+                        <div class="quality-item">
+                            <label>Garantie</label>
+                            <select id="warranty" class="premium-select">
+                                <option value="10">10 ans</option>
+                                <option value="20" selected>20 ans</option>
+                                <option value="30">30 ans</option>
+                            </select>
+                        </div>
+                        <div class="quality-item">
+                            <label>Finition</label>
+                            <select id="finish" class="premium-select">
+                                <option value="standard">Standard</option>
+                                <option value="premium" selected>Premium</option>
+                                <option value="luxe">Luxe</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-estimate">
+                    <h4>Estimation indicative</h4>
+                    <div class="price-value">
+                        <span class="price-amount" id="priceEstimate">À partir de 8 500€</span>
+                        <span class="price-info">TVA incluse</span>
+                    </div>
+                    <p class="price-note">*Prix indicatif pour une surface de 100m². Devis personnalisé gratuit.</p>
                 </div>
 
                 <div class="action-buttons">

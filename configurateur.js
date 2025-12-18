@@ -2,7 +2,7 @@
 // CONFIGURATEUR 3D - THREE.JS
 // ================================
 
-let scene, camera, renderer, house, roof, chimney, skylight, gutter;
+let scene, camera, renderer, house, roof, chimney, skylight, gutter, solarPanels;
 let roofMaterial, wallMaterial;
 let currentRoofType = 'gable';
 let currentMaterial = 'tuiles';
@@ -13,7 +13,40 @@ let currentPitch = 35;
 const config = {
     showChimney: false,
     showSkylight: false,
-    showGutter: false
+    showGutter: false,
+    showSolarPanels: false
+};
+
+// Palettes de couleurs par matériau
+const colorPalettes = {
+    tuiles: [
+        { color: '#8B4513', name: 'Rouge terre cuite' },
+        { color: '#CD5C5C', name: 'Rouge vif' },
+        { color: '#A0522D', name: 'Brun terracotta' },
+        { color: '#8B4726', name: 'Brun foncé' },
+        { color: '#D2691E', name: 'Orange brûlé' }
+    ],
+    ardoises: [
+        { color: '#2F4F4F', name: 'Gris anthracite' },
+        { color: '#1C1C1C', name: 'Noir ardoise' },
+        { color: '#696969', name: 'Gris foncé' },
+        { color: '#708090', name: 'Gris ardoise clair' },
+        { color: '#36454F', name: 'Gris charbon' }
+    ],
+    zinc: [
+        { color: '#C0C0C0', name: 'Zinc naturel' },
+        { color: '#A9A9A9', name: 'Gris argenté' },
+        { color: '#8B8B83', name: 'Zinc patiné' },
+        { color: '#D3D3D3', name: 'Gris clair' }
+    ],
+    'bac-acier': [
+        { color: '#696969', name: 'Gris anthracite' },
+        { color: '#8B8B83', name: 'Beige' },
+        { color: '#8B4513', name: 'Brun' },
+        { color: '#2F4F4F', name: 'Gris foncé' },
+        { color: '#C0C0C0', name: 'Gris clair' },
+        { color: '#1C1C1C', name: 'Noir' }
+    ]
 };
 
 // ================================
@@ -27,8 +60,8 @@ function init3D() {
 
     // Scène
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xe3f2fd);
-    scene.fog = new THREE.Fog(0xe3f2fd, 50, 100);
+    scene.background = new THREE.Color(0x1a2530);
+    scene.fog = new THREE.Fog(0x1a2530, 50, 100);
 
     // Caméra
     camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
@@ -65,8 +98,9 @@ function init3D() {
     // Sol
     const groundGeometry = new THREE.PlaneGeometry(100, 100);
     const groundMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x7cb342,
-        roughness: 0.8
+        color: 0x2a3f4f,
+        roughness: 0.9,
+        metalness: 0.1
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
@@ -74,9 +108,11 @@ function init3D() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Grille
-    const gridHelper = new THREE.GridHelper(50, 50, 0x888888, 0xcccccc);
+    // Grille premium
+    const gridHelper = new THREE.GridHelper(50, 50, 0xb87333, 0x34495e);
     gridHelper.position.y = 0;
+    gridHelper.material.opacity = 0.3;
+    gridHelper.material.transparent = true;
     scene.add(gridHelper);
 
     // Créer la maison
@@ -552,7 +588,7 @@ function updateOptions() {
     if (chimney) {
         roof.remove(chimney);
     }
-    if (config.showChimney) {
+    if (config.showChimney && currentRoofType !== 'flat') {
         chimney = createChimney();
         roof.add(chimney);
     }
@@ -561,7 +597,7 @@ function updateOptions() {
     if (skylight) {
         roof.remove(skylight);
     }
-    if (config.showSkylight) {
+    if (config.showSkylight && currentRoofType !== 'flat') {
         skylight = createSkylight();
         roof.add(skylight);
     }
@@ -574,22 +610,38 @@ function updateOptions() {
         gutter = createGutters();
         house.add(gutter);
     }
+
+    // Panneaux solaires
+    if (solarPanels) {
+        roof.remove(solarPanels);
+    }
+    if (config.showSolarPanels && currentRoofType !== 'flat') {
+        solarPanels = createSolarPanels();
+        roof.add(solarPanels);
+    }
 }
 
 function createChimney() {
     const group = new THREE.Group();
-    const brickMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+    const brickMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x8B4513,
+        roughness: 0.9
+    });
     
-    const geometry = new THREE.BoxGeometry(1, 3, 1);
+    const pitchRad = (currentPitch * Math.PI) / 180;
+    const roofHeight = (5 * Math.tan(pitchRad)) / 2;
+    
+    const geometry = new THREE.BoxGeometry(1, 3.5, 1);
     const chimneyMesh = new THREE.Mesh(geometry, brickMaterial);
-    chimneyMesh.position.set(2, 6.5, 1);
+    // Position adaptée à la pente
+    chimneyMesh.position.set(-3, 5 + roofHeight * 0.6 + 1.75, 0);
     chimneyMesh.castShadow = true;
     group.add(chimneyMesh);
 
     const capGeometry = new THREE.BoxGeometry(1.3, 0.3, 1.3);
     const capMaterial = new THREE.MeshStandardMaterial({ color: 0x666666 });
     const cap = new THREE.Mesh(capGeometry, capMaterial);
-    cap.position.set(2, 8.15, 1);
+    cap.position.set(-3, 5 + roofHeight * 0.6 + 3.65, 0);
     cap.castShadow = true;
     group.add(cap);
 
@@ -599,33 +651,104 @@ function createChimney() {
 function createSkylight() {
     const group = new THREE.Group();
     
-    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const frameGeometry = new THREE.BoxGeometry(2, 0.1, 1.5);
+    const pitchRad = (currentPitch * Math.PI) / 180;
+    const roofHeight = (5 * Math.tan(pitchRad)) / 2;
+    const angle = -pitchRad;
+    
+    // Cadre du Velux
+    const frameMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x2c2c2c,
+        metalness: 0.3,
+        roughness: 0.7
+    });
+    const frameGeometry = new THREE.BoxGeometry(1.2, 0.12, 1.8);
     const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-    frame.position.set(-1, 6, 0);
-    frame.rotation.x = -Math.PI / 6;
+    
+    // Position sur le toit côté droit
+    const xPos = 1.5;
+    const yPos = 5 + roofHeight * 0.3 + 0.1;
+    const zPos = -1;
+    
+    frame.position.set(xPos, yPos, zPos);
+    frame.rotation.x = angle;
     frame.castShadow = true;
     group.add(frame);
 
-    const glassMaterial = new THREE.MeshStandardMaterial({ 
+    // Vitre
+    const glassMaterial = new THREE.MeshPhysicalMaterial({ 
         color: 0x87ceeb,
         transparent: true,
-        opacity: 0.4,
-        metalness: 0.5,
-        roughness: 0.1
+        opacity: 0.3,
+        metalness: 0.1,
+        roughness: 0.1,
+        transmission: 0.9,
+        thickness: 0.5
     });
-    const glassGeometry = new THREE.BoxGeometry(1.8, 0.05, 1.3);
+    const glassGeometry = new THREE.BoxGeometry(1.1, 0.05, 1.7);
     const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-    glass.position.set(-1, 6.05, 0);
-    glass.rotation.x = -Math.PI / 6;
+    glass.position.set(xPos, yPos + 0.08, zPos);
+    glass.rotation.x = angle;
     group.add(glass);
+
+    return group;
+}
+
+function createSolarPanels() {
+    const group = new THREE.Group();
+    
+    const pitchRad = (currentPitch * Math.PI) / 180;
+    const roofHeight = (5 * Math.tan(pitchRad)) / 2;
+    const angle = -pitchRad;
+    
+    // Matériau des panneaux
+    const panelMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x1a1a2e,
+        metalness: 0.6,
+        roughness: 0.3
+    });
+    
+    // Créer 6 panneaux (2x3)
+    for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 3; col++) {
+            const panelGeometry = new THREE.BoxGeometry(1.2, 0.08, 1.8);
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            
+            const xPos = -2.5 + col * 1.3;
+            const yPos = 5 + roofHeight * 0.5 + 0.15;
+            const zPos = -2 + row * 1.9;
+            
+            panel.position.set(xPos, yPos, zPos);
+            panel.rotation.x = angle;
+            panel.castShadow = true;
+            group.add(panel);
+            
+            // Reflet sur le panneau
+            const reflectGeometry = new THREE.BoxGeometry(1.1, 0.02, 1.7);
+            const reflectMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4a90e2,
+                metalness: 0.9,
+                roughness: 0.1,
+                emissive: 0x1a3a5a,
+                emissiveIntensity: 0.2
+            });
+            const reflect = new THREE.Mesh(reflectGeometry, reflectMaterial);
+            reflect.position.set(xPos, yPos + 0.05, zPos);
+            reflect.rotation.x = angle;
+            group.add(reflect);
+        }
+    }
 
     return group;
 }
 
 function createGutters() {
     const group = new THREE.Group();
-    const gutterMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+    // Gouttières en cuivre
+    const gutterMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xB87333,
+        metalness: 0.7,
+        roughness: 0.3
+    });
 
     // Gouttières horizontales
     const gutterGeometry = new THREE.CylinderGeometry(0.1, 0.1, 10.5, 8);
@@ -760,6 +883,34 @@ function onWindowResize() {
 // GESTIONNAIRES D'ÉVÉNEMENTS
 // ================================
 
+// Fonction pour mettre à jour les couleurs disponibles
+function updateColorPalette() {
+    const colorSelector = document.getElementById('colorSelector');
+    colorSelector.innerHTML = '';
+    
+    const colors = colorPalettes[currentMaterial];
+    colors.forEach((colorData, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'color-btn';
+        if (index === 0 || colorData.color === currentColor) {
+            btn.classList.add('active');
+            currentColor = colorData.color;
+        }
+        btn.setAttribute('data-color', colorData.color);
+        btn.setAttribute('title', colorData.name);
+        btn.style.backgroundColor = colorData.color;
+        
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentColor = colorData.color;
+            createRoof();
+        });
+        
+        colorSelector.appendChild(btn);
+    });
+}
+
 function setupEventListeners() {
     // Type de toiture
     document.querySelectorAll('[data-type]').forEach(btn => {
@@ -767,6 +918,17 @@ function setupEventListeners() {
             document.querySelectorAll('[data-type]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentRoofType = btn.dataset.type;
+            
+            // Masquer certaines options si toit plat
+            const pitchGroup = document.querySelector('#roofPitch').closest('.control-group');
+            if (currentRoofType === 'flat') {
+                pitchGroup.style.opacity = '0.5';
+                pitchGroup.style.pointerEvents = 'none';
+            } else {
+                pitchGroup.style.opacity = '1';
+                pitchGroup.style.pointerEvents = 'auto';
+            }
+            
             createRoof();
         });
     });
@@ -777,19 +939,13 @@ function setupEventListeners() {
             document.querySelectorAll('[data-material]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentMaterial = btn.dataset.material;
+            updateColorPalette();
             createRoof();
         });
     });
 
-    // Couleur
-    document.querySelectorAll('[data-color]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-color]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentColor = btn.dataset.color;
-            createRoof();
-        });
-    });
+    // Initialiser la palette de couleurs
+    updateColorPalette();
 
     // Pente
     const pitchSlider = document.getElementById('roofPitch');
@@ -818,6 +974,11 @@ function setupEventListeners() {
         updateOptions();
     });
 
+    document.getElementById('solarPanels').addEventListener('change', (e) => {
+        config.showSolarPanels = e.target.checked;
+        updateOptions();
+    });
+
     // Boutons
     document.getElementById('resetBtn').addEventListener('click', () => {
         currentRoofType = 'gable';
@@ -827,18 +988,19 @@ function setupEventListeners() {
         config.showChimney = false;
         config.showSkylight = false;
         config.showGutter = false;
+        config.showSolarPanels = false;
 
         document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelector('[data-type="gable"]').classList.add('active');
         document.querySelector('[data-material="tuiles"]').classList.add('active');
-        document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector('[data-color="#8B4513"]').classList.add('active');
         document.getElementById('roofPitch').value = 35;
         document.getElementById('pitchValue').textContent = 35;
         document.getElementById('chimney').checked = false;
         document.getElementById('skylight').checked = false;
         document.getElementById('gutter').checked = false;
+        document.getElementById('solarPanels').checked = false;
 
+        updateColorPalette();
         createRoof();
     });
 

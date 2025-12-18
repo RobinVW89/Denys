@@ -43,10 +43,10 @@ function init3D() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Lumières
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
     sunLight.position.set(20, 30, 20);
     sunLight.castShadow = true;
     sunLight.shadow.camera.left = -20;
@@ -56,6 +56,11 @@ function init3D() {
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     scene.add(sunLight);
+
+    // Lumière d'appoint pour mieux voir les détails
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    fillLight.position.set(-15, 10, -15);
+    scene.add(fillLight);
 
     // Sol
     const groundGeometry = new THREE.PlaneGeometry(100, 100);
@@ -252,11 +257,83 @@ function updateRoofMaterial() {
         metalness = 0.7;
     }
 
+    // Créer un canvas pour la texture procédurale
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Dessiner la texture selon le matériau
+    if (currentMaterial === 'tuiles') {
+        // Texture tuiles
+        ctx.fillStyle = currentColor;
+        ctx.fillRect(0, 0, 512, 512);
+        for (let y = 0; y < 512; y += 40) {
+            for (let x = 0; x < 512; x += 60) {
+                const offset = (y / 40) % 2 === 0 ? 0 : 30;
+                ctx.fillStyle = shadeColor(currentColor, -15);
+                ctx.fillRect(x + offset, y, 58, 38);
+                ctx.strokeStyle = shadeColor(currentColor, -30);
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + offset, y, 58, 38);
+            }
+        }
+    } else if (currentMaterial === 'ardoises') {
+        // Texture ardoises
+        ctx.fillStyle = currentColor;
+        ctx.fillRect(0, 0, 512, 512);
+        for (let y = 0; y < 512; y += 50) {
+            for (let x = 0; x < 512; x += 40) {
+                const offset = (y / 50) % 2 === 0 ? 0 : 20;
+                ctx.fillStyle = shadeColor(currentColor, Math.random() * 20 - 10);
+                ctx.beginPath();
+                ctx.moveTo(x + offset, y);
+                ctx.lineTo(x + offset + 38, y);
+                ctx.lineTo(x + offset + 38, y + 48);
+                ctx.lineTo(x + offset, y + 48);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = shadeColor(currentColor, -40);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+    } else if (currentMaterial === 'zinc' || currentMaterial === 'bac-acier') {
+        // Texture métallique
+        ctx.fillStyle = currentColor;
+        ctx.fillRect(0, 0, 512, 512);
+        if (currentMaterial === 'bac-acier') {
+            for (let y = 0; y < 512; y += 8) {
+                ctx.strokeStyle = shadeColor(currentColor, y % 16 === 0 ? 15 : -10);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(512, y);
+                ctx.stroke();
+            }
+        }
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(4, 4);
+
     roofMaterial = new THREE.MeshStandardMaterial({
-        color: currentColor,
+        map: texture,
         roughness: roughness,
         metalness: metalness
     });
+}
+
+// Fonction helper pour modifier la teinte d'une couleur
+function shadeColor(color, percent) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+    const G = Math.min(255, Math.max(0, (num >> 8 & 0x00FF) + amt));
+    const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
+    return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
 // ================================

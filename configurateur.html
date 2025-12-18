@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurateur 3D de Toiture - De Nys Clément</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="configurateur.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>De Nys Clément</h2>
+                <span class="nav-tagline">Couvreur Familial</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#accueil">Accueil</a></li>
+                <li><a href="index.html#presentation">Notre Histoire</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="index.html#realisations">Réalisations</a></li>
+                <li><a href="index.html#avis">Témoignages</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="configurateur.html" class="active">Configurateur 3D</a></li>
+            </ul>
+            <a href="tel:+32412345678" class="nav-phone">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                </svg>
+                +32 4XX XX XX XX
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Configurateur Section -->
+    <section class="configurateur-section">
+        <div class="configurateur-container">
+            <!-- Panneau de contrôle -->
+            <div class="control-panel">
+                <div class="panel-header">
+                    <h2>Configurateur 3D</h2>
+                    <p>Personnalisez votre toiture en temps réel</p>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        Type de Toiture
+                    </h3>
+                    <div class="option-grid">
+                        <button class="option-btn active" data-type="gable">
+                            <div class="option-icon">🏠</div>
+                            <span>Toiture à deux pentes</span>
+                        </button>
+                        <button class="option-btn" data-type="hip">
+                            <div class="option-icon">🏘️</div>
+                            <span>Toiture à quatre pentes</span>
+                        </button>
+                        <button class="option-btn" data-type="flat">
+                            <div class="option-icon">🏢</div>
+                            <span>Toiture plate</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+                        </svg>
+                        Matériau
+                    </h3>
+                    <div class="option-grid">
+                        <button class="option-btn active" data-material="tuiles">
+                            <div class="option-icon">🔴</div>
+                            <span>Tuiles en terre cuite</span>
+                        </button>
+                        <button class="option-btn" data-material="ardoises">
+                            <div class="option-icon">⚫</div>
+                            <span>Ardoises naturelles</span>
+                        </button>
+                        <button class="option-btn" data-material="zinc">
+                            <div class="option-icon">⚪</div>
+                            <span>Zinc</span>
+                        </button>
+                        <button class="option-btn" data-material="bac-acier">
+                            <div class="option-icon">🔘</div>
+                            <span>Bac acier</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Couleur
+                    </h3>
+                    <div class="color-selector">
+                        <button class="color-btn active" data-color="#8B4513" style="background-color: #8B4513;" title="Rouge terre cuite"></button>
+                        <button class="color-btn" data-color="#2F4F4F" style="background-color: #2F4F4F;" title="Ardoise gris foncé"></button>
+                        <button class="color-btn" data-color="#696969" style="background-color: #696969;" title="Gris anthracite"></button>
+                        <button class="color-btn" data-color="#8B7355" style="background-color: #8B7355;" title="Brun"></button>
+                        <button class="color-btn" data-color="#708090" style="background-color: #708090;" title="Gris ardoise"></button>
+                        <button class="color-btn" data-color="#CD5C5C" style="background-color: #CD5C5C;" title="Rouge"></button>
+                        <button class="color-btn" data-color="#1C1C1C" style="background-color: #1C1C1C;" title="Noir"></button>
+                        <button class="color-btn" data-color="#C0C0C0" style="background-color: #C0C0C0;" title="Zinc naturel"></button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                        Pente de toiture
+                    </h3>
+                    <div class="slider-container">
+                        <input type="range" id="roofPitch" min="15" max="60" value="35" class="slider">
+                        <div class="slider-value">
+                            <span id="pitchValue">35</span>°
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Options supplémentaires
+                    </h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chimney">
+                            <span>Cheminée</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="skylight">
+                            <span>Fenêtre de toit</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="gutter">
+                            <span>Gouttières</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="resetBtn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                        </svg>
+                        Réinitialiser
+                    </button>
+                    <button class="btn-secondary" id="contactBtn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                        </svg>
+                        Demander un devis
+                    </button>
+                </div>
+
+                <div class="info-box">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                    <p>Ce configurateur vous permet de visualiser votre future toiture. Pour un devis précis, contactez-nous.</p>
+                </div>
+            </div>
+
+            <!-- Viewer 3D -->
+            <div class="viewer-3d">
+                <div class="viewer-controls">
+                    <button class="view-btn" id="viewFront" title="Vue de face">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                    </button>
+                    <button class="view-btn active" id="viewTop" title="Vue de dessus">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+                        </svg>
+                    </button>
+                    <button class="view-btn" id="viewSide" title="Vue de côté">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                        </svg>
+                    </button>
+                    <button class="view-btn" id="viewReset" title="Vue isométrique">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        </svg>
+                    </button>
+                </div>
+                <canvas id="canvas3d"></canvas>
+                <div class="viewer-info">
+                    <p>🖱️ Clic gauche + glisser pour tourner | 🖱️ Molette pour zoomer</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>De Nys Clément</h3>
+                    <p>Couvreur professionnel en Belgique depuis plus de 30 ans</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>📞 +32 4XX XX XX XX</p>
+                    <p>✉️ contact@denysclement.be</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Horaires</h4>
+                    <p>Lun - Ven : 8h - 18h</p>
+                    <p>Sam : 9h - 13h</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 De Nys Clément - Tous droits réservés</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+    <script src="configurateur.js"></script>
+</body>
+</html>

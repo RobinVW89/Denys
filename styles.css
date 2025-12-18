@@ -110,6 +110,22 @@ body {
     width: 100%;
 }
 
+.nav-menu .nav-highlight {
+    background: linear-gradient(135deg, var(--color-copper), var(--color-gold));
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+}
+
+.nav-menu .nav-highlight::after {
+    display: none;
+}
+
+.nav-menu .nav-highlight:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(184, 115, 51, 0.4);
+}
+
 .nav-phone {
     display: flex;
     align-items: center;

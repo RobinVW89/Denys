@@ -161,39 +161,80 @@ function createRoof() {
 }
 
 function createGableRoof(height) {
-    const shape = new THREE.Shape();
-    shape.moveTo(-5, 0);
-    shape.lineTo(5, 0);
-    shape.lineTo(0, height);
-    shape.lineTo(-5, 0);
-
-    const extrudeSettings = {
-        depth: 8,
-        bevelEnabled: false
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    const roofMesh = new THREE.Mesh(geometry, roofMaterial);
-    roofMesh.rotation.x = Math.PI / 2;
-    roofMesh.position.set(0, 5, -4);
-    roofMesh.castShadow = true;
-    roofMesh.receiveShadow = true;
-    roof.add(roofMesh);
-
-    // Pignons
-    const pignonMaterial = new THREE.MeshStandardMaterial({ color: 0xfaf0e6 });
-    const pignonGeometry = new THREE.BufferGeometry();
-    const pignonVertices = new Float32Array([
-        -5, 5, -4,  5, 5, -4,  0, 5 + height, -4,
-        -5, 5, 4,   5, 5, 4,   0, 5 + height, 4
+    // Pente gauche (côté -X)
+    const leftVertices = new Float32Array([
+        -5, 5, -4,     // 0: bas gauche avant
+        0, 5 + height, -4,  // 1: sommet avant
+        0, 5 + height, 4,   // 2: sommet arrière
+        -5, 5, 4,      // 3: bas gauche arrière
     ]);
-    pignonGeometry.setAttribute('position', new THREE.BufferAttribute(pignonVertices, 3));
-    pignonGeometry.setIndex([0, 1, 2, 3, 5, 4]);
-    pignonGeometry.computeVertexNormals();
+    const leftUvs = new Float32Array([
+        0, 0,
+        1, 0,
+        1, 1,
+        0, 1
+    ]);
+    const leftGeometry = new THREE.BufferGeometry();
+    leftGeometry.setAttribute('position', new THREE.BufferAttribute(leftVertices, 3));
+    leftGeometry.setAttribute('uv', new THREE.BufferAttribute(leftUvs, 2));
+    leftGeometry.setIndex([0, 1, 2, 0, 2, 3]);
+    leftGeometry.computeVertexNormals();
+    
+    const leftRoof = new THREE.Mesh(leftGeometry, roofMaterial);
+    leftRoof.castShadow = true;
+    leftRoof.receiveShadow = true;
+    roof.add(leftRoof);
 
-    const pignons = new THREE.Mesh(pignonGeometry, pignonMaterial);
-    pignons.castShadow = true;
-    roof.add(pignons);
+    // Pente droite (côté +X)
+    const rightVertices = new Float32Array([
+        0, 5 + height, -4,  // 0: sommet avant
+        5, 5, -4,      // 1: bas droit avant
+        5, 5, 4,       // 2: bas droit arrière
+        0, 5 + height, 4,   // 3: sommet arrière
+    ]);
+    const rightUvs = new Float32Array([
+        0, 0,
+        1, 0,
+        1, 1,
+        0, 1
+    ]);
+    const rightGeometry = new THREE.BufferGeometry();
+    rightGeometry.setAttribute('position', new THREE.BufferAttribute(rightVertices, 3));
+    rightGeometry.setAttribute('uv', new THREE.BufferAttribute(rightUvs, 2));
+    rightGeometry.setIndex([0, 1, 2, 0, 2, 3]);
+    rightGeometry.computeVertexNormals();
+    
+    const rightRoof = new THREE.Mesh(rightGeometry, roofMaterial);
+    rightRoof.castShadow = true;
+    rightRoof.receiveShadow = true;
+    roof.add(rightRoof);
+
+    // Pignons (triangles aux extrémités)
+    const pignonMaterial = new THREE.MeshStandardMaterial({ color: 0xfaf0e6 });
+    
+    // Pignon avant
+    const frontPignonGeometry = new THREE.BufferGeometry();
+    const frontPignonVertices = new Float32Array([
+        -5, 5, -4,  5, 5, -4,  0, 5 + height, -4
+    ]);
+    frontPignonGeometry.setAttribute('position', new THREE.BufferAttribute(frontPignonVertices, 3));
+    frontPignonGeometry.setIndex([0, 1, 2]);
+    frontPignonGeometry.computeVertexNormals();
+    const frontPignon = new THREE.Mesh(frontPignonGeometry, pignonMaterial);
+    frontPignon.castShadow = true;
+    roof.add(frontPignon);
+    
+    // Pignon arrière
+    const backPignonGeometry = new THREE.BufferGeometry();
+    const backPignonVertices = new Float32Array([
+        -5, 5, 4,  0, 5 + height, 4,  5, 5, 4
+    ]);
+    backPignonGeometry.setAttribute('position', new THREE.BufferAttribute(backPignonVertices, 3));
+    backPignonGeometry.setIndex([0, 1, 2]);
+    backPignonGeometry.computeVertexNormals();
+    const backPignon = new THREE.Mesh(backPignonGeometry, pignonMaterial);
+    backPignon.castShadow = true;
+    roof.add(backPignon);
 }
 
 function createHipRoof(height) {
@@ -281,104 +322,211 @@ function updateRoofMaterial() {
 
     // Dessiner la texture selon le matériau
     if (currentMaterial === 'tuiles') {
-        // Texture tuiles - Plus détaillée
-        ctx.fillStyle = currentColor;
+        // Texture tuiles - AVEC RELIEF TRÈS VISIBLE
+        ctx.fillStyle = shadeColor(currentColor, -20);
         ctx.fillRect(0, 0, 1024, 1024);
         
         for (let y = 0; y < 1024; y += 50) {
             for (let x = 0; x < 1024; x += 75) {
                 const offset = (y / 50) % 2 === 0 ? 0 : 37.5;
-                // Base de la tuile
-                ctx.fillStyle = shadeColor(currentColor, -10);
+                
+                // Base sombre de la tuile
+                ctx.fillStyle = shadeColor(currentColor, -15);
                 ctx.fillRect(x + offset, y, 73, 48);
                 
-                // Ombre de la tuile
-                ctx.fillStyle = shadeColor(currentColor, -25);
-                ctx.fillRect(x + offset, y + 40, 73, 8);
+                // Partie éclairée (relief)
+                ctx.fillStyle = currentColor;
+                ctx.fillRect(x + offset, y, 73, 35);
                 
-                // Bordure
-                ctx.strokeStyle = shadeColor(currentColor, -35);
-                ctx.lineWidth = 2;
+                // Ombre forte en bas (profondeur)
+                ctx.fillStyle = shadeColor(currentColor, -40);
+                ctx.fillRect(x + offset, y + 38, 73, 10);
+                
+                // Reflet en haut (volume)
+                const gradient = ctx.createLinearGradient(x + offset, y, x + offset, y + 20);
+                gradient.addColorStop(0, shadeColor(currentColor, 30));
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x + offset + 2, y + 2, 69, 15);
+                
+                // Bordures noires
+                ctx.strokeStyle = shadeColor(currentColor, -50);
+                ctx.lineWidth = 3;
                 ctx.strokeRect(x + offset, y, 73, 48);
                 
-                // Reflet
-                ctx.fillStyle = shadeColor(currentColor, 10);
-                ctx.fillRect(x + offset + 5, y + 5, 15, 10);
+                // Ligne de séparation verticale
+                ctx.beginPath();
+                ctx.moveTo(x + offset + 36, y);
+                ctx.lineTo(x + offset + 36, y + 48);
+                ctx.strokeStyle = shadeColor(currentColor, -45);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
             }
         }
     } else if (currentMaterial === 'ardoises') {
-        // Texture ardoises - Plus réaliste
-        ctx.fillStyle = currentColor;
+        // Texture ardoises - AVEC RELIEF MARQUÉ
+        ctx.fillStyle = shadeColor(currentColor, -25);
         ctx.fillRect(0, 0, 1024, 1024);
         
-        for (let y = 0; y < 1024; y += 60) {
-            for (let x = 0; x < 1024; x += 50) {
-                const offset = (y / 60) % 2 === 0 ? 0 : 25;
-                const variation = Math.random() * 15 - 7;
+        for (let y = 0; y < 1024; y += 55) {
+            for (let x = 0; x < 1024; x += 45) {
+                const offset = (y / 55) % 2 === 0 ? 0 : 22.5;
+                const variation = Math.random() * 12 - 6;
                 
-                ctx.fillStyle = shadeColor(currentColor, variation);
-                ctx.beginPath();
-                ctx.moveTo(x + offset, y);
-                ctx.lineTo(x + offset + 48, y);
-                ctx.lineTo(x + offset + 48, y + 58);
-                ctx.lineTo(x + offset, y + 58);
-                ctx.closePath();
-                ctx.fill();
+                // Base de l'ardoise
+                ctx.fillStyle = shadeColor(currentColor, variation - 10);
+                ctx.fillRect(x + offset, y, 44, 53);
                 
-                // Bordures plus marquées
-                ctx.strokeStyle = shadeColor(currentColor, -45);
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
+                // Partie éclairée
+                ctx.fillStyle = shadeColor(currentColor, variation + 5);
+                ctx.fillRect(x + offset + 1, y + 1, 42, 40);
                 
-                // Petites imperfections
-                if (Math.random() > 0.7) {
-                    ctx.fillStyle = shadeColor(currentColor, variation + 20);
-                    ctx.fillRect(x + offset + 10, y + 10, 10, 10);
+                // Ombre en bas (superposition)
+                const shadowGradient = ctx.createLinearGradient(x + offset, y + 40, x + offset, y + 53);
+                shadowGradient.addColorStop(0, 'transparent');
+                shadowGradient.addColorStop(1, shadeColor(currentColor, -50));
+                ctx.fillStyle = shadowGradient;
+                ctx.fillRect(x + offset, y + 40, 44, 13);
+                
+                // Bordures très marquées
+                ctx.strokeStyle = shadeColor(currentColor, -60);
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + offset, y, 44, 53);
+                
+                // Reflet léger
+                if (Math.random() > 0.5) {
+                    ctx.fillStyle = shadeColor(currentColor, variation + 25);
+                    ctx.fillRect(x + offset + 3, y + 3, 15, 8);
                 }
+                
+                // Lignes de relief
+                ctx.strokeStyle = shadeColor(currentColor, -40);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x + offset, y + 20);
+                ctx.lineTo(x + offset + 44, y + 20);
+                ctx.stroke();
             }
         }
     } else if (currentMaterial === 'zinc') {
-        // Texture zinc - Métallique lisse
-        const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
-        gradient.addColorStop(0, shadeColor(currentColor, 20));
-        gradient.addColorStop(0.5, currentColor);
-        gradient.addColorStop(1, shadeColor(currentColor, -15));
-        ctx.fillStyle = gradient;
+        // Texture zinc - Métallique avec joints très visibles
+        ctx.fillStyle = currentColor;
         ctx.fillRect(0, 0, 1024, 1024);
         
-        // Joints de zinc
-        ctx.strokeStyle = shadeColor(currentColor, -30);
-        ctx.lineWidth = 3;
-        for (let i = 0; i < 1024; i += 200) {
+        // Bandes de zinc avec relief
+        for (let i = 0; i < 1024; i += 150) {
+            // Joint creux (ombre)
+            ctx.fillStyle = shadeColor(currentColor, -35);
+            ctx.fillRect(0, i - 5, 1024, 10);
+            
+            // Relief de la bande
+            const bandGradient = ctx.createLinearGradient(0, i, 0, i + 150);
+            bandGradient.addColorStop(0, shadeColor(currentColor, 25));
+            bandGradient.addColorStop(0.5, currentColor);
+            bandGradient.addColorStop(1, shadeColor(currentColor, -20));
+            ctx.fillStyle = bandGradient;
+            ctx.fillRect(0, i, 1024, 150);
+            
+            // Ligne de joint en relief
+            ctx.strokeStyle = shadeColor(currentColor, -45);
+            ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(0, i);
             ctx.lineTo(1024, i);
             ctx.stroke();
         }
     } else if (currentMaterial === 'bac-acier') {
-        // Texture bac acier - Avec ondulations
-        ctx.fillStyle = currentColor;
+        // Texture bac acier - Ondulations TRÈS visibles
+        ctx.fillStyle = shadeColor(currentColor, -10);
         ctx.fillRect(0, 0, 1024, 1024);
         
-        for (let y = 0; y < 1024; y += 12) {
-            const isRidge = y % 24 === 0;
-            ctx.strokeStyle = shadeColor(currentColor, isRidge ? 25 : -15);
-            ctx.lineWidth = isRidge ? 4 : 2;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(1024, y);
-            ctx.stroke();
+        for (let y = 0; y < 1024; y += 20) {
+            const isRidge = y % 40 === 0; // Crête tous les 40px
+            
+            if (isRidge) {
+                // Crête (partie haute) - très claire
+                const ridgeGradient = ctx.createLinearGradient(0, y - 10, 0, y + 10);
+                ridgeGradient.addColorStop(0, shadeColor(currentColor, -15));
+                ridgeGradient.addColorStop(0.5, shadeColor(currentColor, 35));
+                ridgeGradient.addColorStop(1, currentColor);
+                ctx.fillStyle = ridgeGradient;
+                ctx.fillRect(0, y - 10, 1024, 20);
+                
+                // Ligne de crête
+                ctx.strokeStyle = shadeColor(currentColor, 45);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(1024, y);
+                ctx.stroke();
+            } else {
+                // Creux (partie basse) - sombre
+                const valleyGradient = ctx.createLinearGradient(0, y - 10, 0, y + 10);
+                valleyGradient.addColorStop(0, currentColor);
+                valleyGradient.addColorStop(0.5, shadeColor(currentColor, -30));
+                valleyGradient.addColorStop(1, shadeColor(currentColor, -10));
+                ctx.fillStyle = valleyGradient;
+                ctx.fillRect(0, y - 10, 1024, 20);
+                
+                // Ligne de creux
+                ctx.strokeStyle = shadeColor(currentColor, -40);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(1024, y);
+                ctx.stroke();
+            }
         }
     }
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(3, 3);
+    texture.repeat.set(2, 2);
     texture.needsUpdate = true;
+
+    // Créer une normal map pour accentuer le relief
+    const normalCanvas = document.createElement('canvas');
+    normalCanvas.width = 512;
+    normalCanvas.height = 512;
+    const normalCtx = normalCanvas.getContext('2d');
+    
+    // Convertir la texture en données de hauteur pour la normal map
+    normalCtx.fillStyle = '#8080ff'; // Couleur neutre pour normal map
+    normalCtx.fillRect(0, 0, 512, 512);
+    
+    if (currentMaterial === 'tuiles' || currentMaterial === 'ardoises') {
+        // Ajouter des variations de hauteur
+        for (let y = 0; y < 512; y += 25) {
+            for (let x = 0; x < 512; x += 35) {
+                const offset = (y / 25) % 2 === 0 ? 0 : 17.5;
+                // Relief vers le haut (bleu clair)
+                normalCtx.fillStyle = '#a0a0ff';
+                normalCtx.fillRect(x + offset, y, 33, 12);
+                // Relief vers le bas (bleu foncé)
+                normalCtx.fillStyle = '#6060ff';
+                normalCtx.fillRect(x + offset, y + 12, 33, 10);
+            }
+        }
+    } else if (currentMaterial === 'bac-acier') {
+        // Ondulations
+        for (let y = 0; y < 512; y += 10) {
+            const isRidge = y % 20 === 0;
+            normalCtx.fillStyle = isRidge ? '#c0c0ff' : '#4040ff';
+            normalCtx.fillRect(0, y, 512, 10);
+        }
+    }
+    
+    const normalTexture = new THREE.CanvasTexture(normalCanvas);
+    normalTexture.wrapS = THREE.RepeatWrapping;
+    normalTexture.wrapT = THREE.RepeatWrapping;
+    normalTexture.repeat.set(2, 2);
+    normalTexture.needsUpdate = true;
 
     roofMaterial = new THREE.MeshStandardMaterial({
         map: texture,
+        normalMap: normalTexture,
+        normalScale: new THREE.Vector2(0.5, 0.5),
         roughness: roughness,
         metalness: metalness,
         side: THREE.DoubleSide
